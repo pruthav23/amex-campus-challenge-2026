@@ -1,0 +1,11 @@
+# Competition data is not redistributed
+data/
+
+# Generated outputs
+predictions.csv
+
+# Python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.venv/
