@@ -11,6 +11,9 @@ PARAMS = {
     "lgd_x_pd_weight": 5.1,
     "collection_cost": 400,
     "cancel_cost": 30,
+    # Cost per point of unredeemed rewards balance (f4).
+    # 0 in the final model. Set to 0.001 to reproduce the 0.875 submission.
+    "points_balance_cost": 0.0,
 }
 
 SPEND_COLS = ["f6", "f7", "f8", "f9", "f10"]
@@ -47,6 +50,7 @@ def score_members(frame, params=PARAMS):
         + params["lgd_x_pd_weight"] * frame["f11"] * frame["f1"]
         + params["collection_cost"] * frame["f3"]
         + params["cancel_cost"] * frame["f2"]
+        + params["points_balance_cost"] * frame["f4"]
     )
 
     return income - expenses

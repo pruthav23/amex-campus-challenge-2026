@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 import numpy as np
 import matplotlib
@@ -29,6 +30,7 @@ def save_heatmap(matrix, output, title, size, mask=None):
     plt.close()
 
 def main():
+    os.makedirs("figures", exist_ok=True)
     data = pd.read_csv("data/campus_challenge_r1_data.csv")
     correlation = data.loc[:, FEATURES].corr()
 
