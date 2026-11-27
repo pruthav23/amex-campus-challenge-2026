@@ -142,6 +142,45 @@ Raising both together means revolving customers are credited for the interest th
 
 ---
 
+## PCA check (`pca_analysis.py`)
+
+Principal component analysis (PCA) was used to test two things: do the feature groups above hold up, and could a compressed, unsupervised view of the data replace the business-driven model?
+
+**Setup:** f23 dropped (88% missing) → missing values filled with medians → log(1 + x) on skewed features so a few extreme members don't dominate → StandardScaler (mean 0, standard deviation 1) so spend in thousands doesn't outweigh counts → PCA on all 22 components.
+
+**1. There is no dominant structure.** The first component explains only 16% of the variation, and 12 of 22 components are needed to reach 80%. The features carry mostly separate information, so compressing them would lose a lot.
+
+![PCA variance explained](figures/pca_variance.png)
+
+**2. The main components match the correlation groups.**
+
+| Component | Variance | Driven by | Meaning |
+|---|---|---|---|
+| PC1 | 16% | f10, f6, f8, f9, f7 | Spending |
+| PC2 | 12% | f3, f11, f1 (+); f17, f18 (−) | Credit risk: risky revolvers with low credit limits |
+| PC3 | 9% | f19, f20, f12, f22 | Account footprint and engagement |
+| PC4–5 | 7%, 7% | f16 vs f2; credit limits | Retention and benefits |
+| PC6 | 5% | f5 alone | The unreliable "total spend" |
+| PC7 | 5% | f21 | Points redeemed |
+
+**3. PCA independently confirms f5 is unreliable.** "Total spend" has almost no weight on the spending component (−0.03) and sits alone on PC6.
+
+![PCA loadings](figures/pca_loadings.png)
+
+**4. PCA cannot tell profitable revolvers from risky ones.** Revolving balance (f1) and risk (f11, f3) rise together, so PCA puts them on the same component. For profit they point opposite ways:
+
+- 67% of the top 20% carry a balance, against 42% of everyone else, so revolvers are where the money is.
+- But the top 20% have a far lower average risk score (0.007 vs 0.040).
+- Among revolvers, low-risk members earn 3.4× more (median profit 1,985 vs 581).
+
+The profit model separates the two on purpose: interest income on f1, minus expected loss on f11 × f1.
+
+**5. Spend alone gets about half way.** Ranking members by PC1 (spending) recovers 51% of the profit model's top 20%, against 20% by chance.
+
+**Conclusion:** PCA supports the feature groups and the f5 finding, but its components are blends with no business meaning, and it merges two forces that the profit model needs to keep apart. So the model uses the original features.
+
+---
+
 ## Features not used, and why
 
 | Feature | Why it's excluded |
@@ -200,6 +239,7 @@ pip install -r requirements.txt
 
 python edaFile.py                  # prints EDA checks
 python charts.py                   # saves figures to figures/
+python pca_analysis.py             # PCA check, saves figures to figures/
 python profitability_framework.py  # writes predictions.csv (columns: ID, Prediction)
 
 # check which model version produced a past submission
@@ -214,6 +254,7 @@ python compare_submission.py path/to/submission.xlsx --points-balance-cost 0.001
 ├── charts.py                   # correlation visualisations → figures/
 ├── profitability_framework.py  # P&L scoring model → predictions.csv
 ├── compare_submission.py       # match a past submission to a model version
+├── pca_analysis.py             # PCA check of feature structure
 ├── figures/                    # generated charts
 ├── requirements.txt
 └── README.md
